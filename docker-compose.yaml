@@ -1,0 +1,23 @@
+version: "3.7"
+services:
+  mysql:
+    image: woahbase/alpine-mysql:x86_64
+    container_name: redrain-db
+    restart: always
+    cap_add:
+      - SYS_NICE
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    environment:
+      MYSQL_USER: redrain
+      MYSQL_USER_PWD: redrain
+      MYSQL_ROOT_PWD: redrain
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  dbdata:
