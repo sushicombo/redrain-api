@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -8,7 +9,9 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/joho/godotenv"
 	"github.com/sushicombo/redrain-api/db/mysql"
-	"github.com/sushicombo/redrain-api/repository/events"
+	emonggo "github.com/sushicombo/redrain-api/repository/events/monggodb"
+	emysql "github.com/sushicombo/redrain-api/repository/events/mysql"
+	"github.com/sushicombo/redrain-api/usecase/event"
 )
 
 func main() {
@@ -28,7 +31,10 @@ func main() {
 		log.Panic("error: database connection")
 	}
 
-	eventRepo := events.InitEventRepo(db_conn)
+	eventRepo := emysql.InitEventRepo(db_conn)
+	fmt.Println(eventRepo)
+	eventMonggoRepo := emonggo.InitEventRepoMonggo("hello")
+	eventUsecase := event.InitEventUsecase(&eventMonggoRepo)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -36,7 +42,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		if err := eventRepo.UpdateEventCounter(); err != nil {
+		if err := eventUsecase.UpdateEventCounter(); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
 			w.Write([]byte("data update successfully"))
