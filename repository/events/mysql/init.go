@@ -1,4 +1,4 @@
-package events
+package mysql
 
 import "github.com/jmoiron/sqlx"
 
